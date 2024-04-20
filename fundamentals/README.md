@@ -4,3 +4,4 @@
 2. [Network Protocols](./02-network-protocols.md)
 3. [Latency And Throughput](./03-latency-and-throughput.md)
 4. [Availability](./04-availability.md)
+5. [Caching](./05-caching.md)

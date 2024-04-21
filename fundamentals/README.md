@@ -6,3 +6,4 @@
 4. [Availability](./04-availability.md)
 5. [Caching](./05-caching.md)
 6. [Proxies](./06-proxies.md)
+7. [Load Balancing](./07-load-balancing.md)

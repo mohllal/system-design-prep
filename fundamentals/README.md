@@ -9,3 +9,4 @@
 7. [Load Balancing](./07-load-balancing.md)
 8. [Hashing](./08-hashing.md)
 9. [Relational Databases](./09-relational-databases.md)
+10. [Non-Relational Databases](./10-non-relational-databases.md)

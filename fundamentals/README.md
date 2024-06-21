@@ -10,3 +10,4 @@
 8. [Hashing](./08-hashing.md)
 9. [Relational Databases](./09-relational-databases.md)
 10. [Non-Relational Databases](./10-non-relational-databases.md)
+11. [Database Replication](./11-database-replication.md)

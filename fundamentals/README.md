@@ -12,3 +12,4 @@
 10. [Non-Relational Databases](./10-non-relational-databases.md)
 11. [Database Replication](./11-database-replication.md)
 12. [Database Sharding](./12-database-sharding.md)
+13. [Leader Election](./13-leader-election.md)

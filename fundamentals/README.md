@@ -17,3 +17,4 @@
 | [Leader Election](./13-leader-election.md)                     | :star2: :star2: :star2: :star2:         |
 | [Peer-to-Peer Networks](./14-peer-to-peer-networks.md)         | :star2: :star2: :star2: :star2: :star2: |
 | [Rate Limiting](./15-rate-limiting.md)                         | :star2: :star2: :star2:                 |
+| [Pub/Sub](./16-pub-sub.md)                                     | :star2: :star2: :star2:                 |

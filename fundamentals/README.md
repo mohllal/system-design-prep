@@ -18,3 +18,4 @@
 | [Peer-to-Peer Networks](./14-peer-to-peer-networks.md)         | :star2: :star2: :star2: :star2: :star2: |
 | [Rate Limiting](./15-rate-limiting.md)                         | :star2: :star2: :star2:                 |
 | [Pub/Sub](./16-pub-sub.md)                                     | :star2: :star2: :star2:                 |
+| [MapReduce](./17-mapreduce.md)                                 | :star2: :star2: :star2: :star2:         |

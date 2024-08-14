@@ -7,3 +7,4 @@ Please note that these notes are not comprehensive and do not cover everything a
 | Topic                                                          | Complexity                              |
 | :------------------------------------------------------------: | :-------------------------------------: |
 | [Microservices](./01-microservices.md)                         | :star2: :star2: :star2: :star2:         |
+| [Event Driven Architecture](./02-event-driven-architecture.md) | :star2: :star2: :star2:                 |

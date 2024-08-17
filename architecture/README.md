@@ -11,3 +11,4 @@ Please note that these notes are not comprehensive and do not cover everything a
 | [Two Phase Commit (2PC)](./03-two-phase-commit.md)                   | :star2: :star2:                         |
 | [Saga](./04-saga.md)                                                 | :star2: :star2: :star2: :star2:         |
 | [Transactional Outbox](./05-transactional-outbox.md)                 | :star2: :star2:                         |
+| [Circuit Breaker](./06-circuit-breaker.md)                           | :star2: :star2:                         |

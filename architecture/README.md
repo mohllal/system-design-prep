@@ -13,3 +13,4 @@ Please note that these notes are not comprehensive and do not cover everything a
 | [Transactional Outbox](./05-transactional-outbox.md)                 | :star2: :star2:                         |
 | [Circuit Breaker](./06-circuit-breaker.md)                           | :star2: :star2:                         |
 | [Event Sourcing](./07-event-sourcing.md)                             | :star2: :star2: :star2: :star2:         |
+| [Command Query Responsibility Segregation (CQRS)](./08-cqrs.md)      | :star2: :star2:                         |

@@ -24,6 +24,7 @@ It is not intended to mimic other comprehensive repositories available elsewhere
 16. [Pub/Sub](./fundamentals/16-pub-sub.md)
 17. [MapReduce](./fundamentals/17-mapreduce.md)
 18. [CAP and PACELC Theorems](./fundamentals/18-cap-and-pacelc-theorems.md)
+19. [Back of the Envelope Calculations](./fundamentals/19-back-of-the-envelope-calculations.md)
 
 ## Architecture
 

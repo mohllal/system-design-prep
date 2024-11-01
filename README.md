@@ -39,9 +39,9 @@ It is not intended to mimic other comprehensive repositories available elsewhere
 9. [Event Sourcing](./architecture/09-event-sourcing.md)
 10. [Command Query Responsibility Segregation (CQRS)](./architecture/10-cqrs.md)
 
-## Systems
+## System Designs
 
-Contains practice problems and designs for real-life systems.
+1. [Design a URL Shortening System](./systems/01-design-a-url-shortening-system.md)
 
 ## Additional Resources
 

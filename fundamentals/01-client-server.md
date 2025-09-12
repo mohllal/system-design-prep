@@ -1,128 +1,287 @@
 # Client-Server Model
 
-The client-server model describes the communication between two computing entities over a network.
+The client-server model is a computing architecture where clients (requesters) and servers (providers) communicate over a network to share resources and services.
 
-Clients are the ones requesting a resource or service and Servers are the ones providing that resource or service.
+**Key Characteristics:**
 
-## IP addresses
+- **Asymmetric**: Clients initiate requests; servers respond
+- **Stateless or Stateful**: Servers may or may not maintain client state
 
-**IPv4**: 32-bit represented in dotted-decimal format e.g. 192.0.2.146.
+## IP Addresses
 
-**IPv6**: 128-bit represented in hexadecimal notation e.g. 2001:0db8:85a3:0000:0000:8a2e:0370:7334.
+Internet Protocol addresses uniquely identify devices on a network.
+
+- **IPv4**: 32-bit (4 bytes) in dotted-decimal format: `192.0.2.146`
+- **IPv6**: 128-bit (16 bytes) in hexadecimal notation: `2001:0db8:85a3:0000:0000:8a2e:0370:7334`
+
+**IPv4 vs IPv6:**
+
+- IPv4: ~4.3 billion addresses (exhausted)
+- IPv6: ~340 undecillion addresses (future-proof)
 
 ## Ports
 
-An integer between 0 and $2^{16}$! Typically ports between 0-1023 are resvered for system ports (a.k.a *well-known* ports).
+Ports are 16-bit numbers (0-65535) that identify specific processes or services on a host.
 
- Some other pre-defined popular ports:
+**Port Ranges:**
+
+- **0-1023**: System/well-known ports (require root privileges)
+- **1024-49151**: Registered ports
+- **49152-65535**: Dynamic/private ports
+
+**Common Well-Known Ports:**
 
 - HTTP: 80
+- HTTPS: 443 (not 8843)
+- DNS: 53
+- SSH: 22
+- FTP: 21
 
-- HTTPS: 8843 / 443
+## DNS (Domain Name System)
 
-- DNS Lookup: 53
+DNS translates human-readable domain names into IP addresses. It's a hierarchical, distributed database system.
 
-## DNS
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant R as DNS Resolver
+    participant Root as Root Server
+    participant TLD as TLD Server (.com)
+    participant Auth as Authoritative Server
+    
+    C->>R: Query: www.example.com
+    R->>Root: Query: www.example.com
+    Root->>R: Refer to .com TLD
+    R->>TLD: Query: www.example.com
+    TLD->>R: Refer to example.com Auth
+    R->>Auth: Query: www.example.com
+    Auth->>R: IP: 192.0.2.146
+    R->>C: IP: 192.0.2.146
+```
 
-Domain Name System is the phonebook for the internet; it desribes the entities and protcols involved in the translation of domain names to IP address.
+### DNS Server Types
 
-### Main types of DNS servers
+**Recursive Resolver:**
 
-- Recursive DNS (a.k.a Recursive Resolver DNS): acts as an intermediary who can get the DNS information on behaf of the client.
-  
-  - If a recursive DNS has the DNS reference cached, or stored for a period of time, then it answers the DNS query by providing the source or IP information.
-  
-  - If not, it passes the query to one or more authoritative DNS servers to find the information.
+- Acts as intermediary between client and DNS infrastructure
+- Caches responses to improve performance
+- Typically provided by ISP or public services (8.8.8.8, 1.1.1.1)
 
-- Authoritative DNS: provides answers to Recursive DNS servers queries translating domain names into IP addresses.
+**Authoritative Server:**
 
-### DNS record request sequence for www.example.com
+- Holds the actual DNS records for a domain
+- Final authority for domain name resolution
+- No caching - always returns current records
 
-1. Client request www.example.com.
+### DNS Resolution Process
 
-2. The request for www.example.com is routed to a *DNS Resolver*, which is typically managed by the user's ISP.
+1. **Client Query**: Browser requests `www.example.com`
+2. **Recursive Resolver**: ISP's DNS server receives query
+3. **Root Server Query**: Resolver asks root server for .com TLD info
+4. **TLD Query**: Resolver asks .com server for `example.com` info  
+5. **Authoritative Query**: Resolver asks `example.com`'s server for www record
+6. **Response Chain**: IP address returned back through the chain
+7. **Caching**: Each step caches the result (TTL-based)
 
-3. The DNS Resolver sends a request to the *DNS Root nameserver* which responds with the address for the .com *TLD DNS nameserver*.
-
-4. The DNS Resolver sends another request to the .com TLD DNS nameserver which responds with the address for the domain's *Authoritative DNS nameserver*.
-
-5. Lastly, the DNS Resolver sends a request to the domain's *Authoritative DNS nameserver* which responds with the IP address of the domain.
-
-6. The DNS Resolver returns the IP address to the client.
-
-## Communication techniques
+## Communication Patterns
 
 ### Polling
 
-Polling is a server/client communication technique where the client repeatedly requests data from the server at regular intervals.
+Client repeatedly requests data from server at regular intervals.
 
-Use cases: applications where real-time data is not critical, such as checking for updates or notifications at regular intervals.
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    
+    loop Every 5 seconds
+        C->>S: GET /api/status
+        S->>C: Response
+    end
+```
+
+**Trade-offs:**
+
+- ✅ Simple to implement
+- ✅ Works with standard HTTP
+- ❌ Inefficient (unnecessary requests)
+- ❌ Higher latency for updates
+
+**Use Cases:** Email checks, system monitoring, non-critical real-time updates
 
 ### Streaming
 
-Streaming is a server/client communication technique where the server continuously sends data to the client as it becomes available.
+Server continuously pushes data to client as it becomes available.
 
-Use cases: applications requiring real-time updates, such as live video streaming, online gaming, or real-time analytics.
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Server
+    
+    C->>S: Establish connection
+    loop Real-time data
+        S->>C: Push data
+    end
+```
 
-Popular algorithms/technologies:
+**Technologies:**
 
-- WebSockets
-- Server-Sent Events (SSE)
-- gRPC Streaming
+- **WebSockets**: Bidirectional, persistent connection
+- **Server-Sent Events (SSE)**: Unidirectional, HTTP-based
+- **gRPC Streaming**: High-performance, Protocol Buffers
+
+**Trade-offs:**
+
+- ✅ Real-time updates
+- ✅ Efficient bandwidth usage
+- ❌ Complex connection management
+- ❌ Firewall/proxy challenges
 
 ### REST (Representational State Transfer)
 
-REST is an architectural style for designing networked applications. It relies on stateless, client-server communication, primarily using HTTP.
+REST is an architectural style for designing web services that treats everything as resources identified by URLs.
 
-Use cases: web services, APIs.
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as REST API
+    
+    C->>S: GET /users/123
+    S->>C: 200 OK + User data
+    
+    C->>S: POST /users
+    S->>C: 201 Created + New user
+    
+    C->>S: PUT /users/123
+    S->>C: 200 OK + Updated user
+    
+    C->>S: DELETE /users/123
+    S->>C: 204 No Content
+```
+
+**Key Principles:**
+
+- **Stateless**: Each request contains all necessary information
+- **Resource-based**: URLs represent resources, not actions
+- **Uniform Interface**: Consistent interaction patterns
+
+**Trade-offs:**
+
+- ✅ Excellent caching support
+- ✅ Stateless scaling
+- ✅ Wide tooling support
+- ❌ Can be chatty (multiple requests)
+- ❌ Over-fetching/under-fetching data
 
 ### RPC (Remote Procedure Call)
 
-RPC allows a program to cause a procedure to execute on another address space (commonly on another physical machine) as if it were a local procedure call.
+RPC allows calling functions on remote servers as if they were local function calls.
 
-Use cases: microservices, distributed systems.
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as RPC Server
+    
+    C->>S: getUserById(123)
+    S->>C: User object
+    
+    C->>S: createUser(userData)
+    S->>C: User ID
+    
+    C->>S: updateUser(123, newData)
+    S->>C: Success/Error
+```
+
+**Types:**
+
+- **JSON-RPC**: Simple, text-based protocol
+- **gRPC**: High-performance, Protocol Buffers
+- **XML-RPC**: Legacy, XML-based format
+
+**Trade-offs:**
+
+- ✅ Natural programming model
+- ✅ Strong typing (gRPC)
+- ✅ High performance potential
+- ❌ Tighter coupling
+- ❌ Limited caching
+- ❌ Language/platform dependencies
 
 ### GraphQL
 
-GraphQL is a query language for APIs and a runtime for executing those queries.
+GraphQL is a query language and runtime that allows clients to request exactly the data they need.
 
-- Use cases: APIs with flexible and complex data requirements.
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant G as GraphQL API
+    participant D1 as User Service
+    participant D2 as Post Service
+    
+    C->>G: Single Query
+    Note over C,G: { user(id: 123) { name, posts { title } } }
+    
+    G->>D1: Fetch user data
+    G->>D2: Fetch user posts
+    D1->>G: User info
+    D2->>G: Posts data
+    
+    G->>C: Combined response
+```
+
+**Key Features:**
+
+- **Single Endpoint**: One URL for all operations
+- **Flexible Queries**: Client specifies exactly what data to fetch
+- **Type System**: Strong schema definition
+- **Real-time**: Built-in subscription support
+
+**Trade-offs:**
+
+- ✅ Prevents over-fetching
+- ✅ Single request for complex data
+- ✅ Self-documenting schema
+- ❌ Complex caching
+- ❌ Query complexity management
 
 ### Message Queues
 
-Message queues provide asynchronous communication between services, allowing for decoupled and scalable systems.
+Asynchronous communication through message brokers enables loose coupling.
 
-Use cases: event-driven architecture, background processing.
+```mermaid
+graph LR
+    P[Producer] -->|Publish| Q[Queue/Topic]
+    Q -->|Consume| C1[Consumer 1]
+    Q -->|Consume| C2[Consumer 2]
+```
 
-Popular algorithms/technologies:
+**Patterns:**
 
-- [RabbitMQ](https://www.rabbitmq.com/)
-- [Apache Kafka](https://kafka.apache.org/)
-- [AWS SQS](https://aws.amazon.com/sqs/)
+- **Point-to-Point**: One producer, one consumer
+- **Publish-Subscribe**: One producer, multiple consumers
+- **Request-Reply**: Synchronous-like behavior over async messaging
 
-### Difference between RPC (Remote Procedure Call) and REST (Representational State Transfer)
+**Technologies:**
 
-#### RPC
+- **RabbitMQ**: Feature-rich, AMQP protocol
+- **Apache Kafka**: High-throughput, distributed streaming
+- **AWS SQS**: Managed, serverless queuing
 
-- Philosophy: action/method-centric, focusing on executing procedures or methods on a remote server.
-- Protocol: can use various protocols like HTTP, TCP, or custom protocols.
-- Message format: often uses formats like JSON-RPC, XML-RPC, or gRPC (Protocol Buffers).
-- Statefulness: can be stateful.
-- Pros: simple for developers, potentially higher performance (e.g., gRPC), strong typing.
-- Cons: tightly coupled, potentially less scalable, interoperability issues with different implementations.
+## Key Considerations
 
-#### REST
+### When to Choose Each Pattern
 
-- Philosophy: resource-centric, focusing on manipulating resources using standard HTTP methods (GET, POST, PUT, DELETE).
-- Protocol: uses HTTP/HTTPS.
-- Message format: commonly uses JSON or XML, but can use any format.
-- Statefulness: stateless.
-- Pros: highly scalable, widely interoperable, leverages existing web infrastructure.
-- Cons: can be complex to design properly, potentially higher overhead, more verbose due to stateless nature.
+**Polling**: Simple integrations, infrequent updates, firewall-friendly
+**Streaming**: Real-time requirements, high-frequency updates, bidirectional communication  
+**REST**: Web APIs, CRUD operations, caching important
+**RPC**: Internal services, performance-critical, strong typing needed
+**GraphQL**: Complex data requirements, mobile clients, API aggregation
+**Message Queues**: Decoupling services, reliability important, async processing
 
-## External references
+## Further References
 
 - [What is DNS?](https://aws.amazon.com/route53/what-is-dns)
 - [WebSockets vs Server-Sent-Events vs Long-Polling vs WebRTC vs WebTransport](https://rxdb.info/articles/websockets-sse-polling-webrtc-webtransport.html)
 - [Distributed Systems: RPC (Remote Procedure Call)](https://www.youtube.com/watch?v=S2osKiqQG9s&ab_channel=MartinKleppmann)
 - [What's the difference between RPC and REST?](https://aws.amazon.com/compare/the-difference-between-rpc-and-rest/)
+- [DNS Record Types Explained](https://www.cloudflare.com/learning/dns/dns-records/)

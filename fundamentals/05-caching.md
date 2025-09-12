@@ -1,66 +1,243 @@
 # Caching
 
-Caching is the practice of storing frequently accessed data in a temporary storage area to reduce access latency, improve performance, and alleviate the load on primary data sources.
+Caching stores frequently accessed data in faster storage to reduce latency, improve performance, and decrease load on primary data sources.
 
-Caching can be useful in scenarios where:
+## When to Use Caching
 
-- There's a significant discrepancy in access times between primary storage and cache.
-- The data is accessed frequently or repeatedly.
-- The cost of fetching data from the primary source is high.
-- The data is relatively static or doesn't change frequently.
+**Ideal Scenarios:**
 
-## Caching types
+- High read-to-write ratios
+- Expensive computations or database queries
+- Slow external API calls
+- Static or infrequently changing data
+- Geographic distribution needs
 
-There are several caching types:
+**Trade-offs:**
 
-- In-Memory caching: data is stored in volatile memory, providing fast access but limited by memory size.
-- Distributed caching: data is stored across multiple nodes in a distributed system, enhancing scalability and fault tolerance.
-- Client-side caching: data is cached on the client side, reducing the need for server requests.
-- Web caching: intermediate caching performed by proxy servers or content delivery networks (CDNs) to serve content closer to the client.
+- ✅ Improves response times
+- ✅ Reduces database load and costs
+- ✅ Better user experience
+- ❌ Data staleness issues
+- ❌ Cache invalidation complexity
+- ❌ Additional infrastructure overhead
 
-## Data staleness
+## Cache Levels
 
-Data staleness refers to the outdatedness of cached data compared to the primary data source. It can be mitigated using strategies like:
+Caching exists at multiple levels in modern systems, each with specific benefits and trade-offs.
 
-- Expiration time: setting a time limit for cached data validity.
-- Cache invalidation: explicitly invalidating or updating cached data when changes occur in the primary source.
-- versioning: associating a version number with cached data to detect staleness.
+```mermaid
+graph TD
+    A[Browser Cache] --> B[CDN Cache]
+    B --> C[Reverse Proxy Cache]
+    C --> D[Application Cache]
+    D --> E[Database Cache]
+    E --> F[OS Cache]
+```
 
-## Caching strategies
+### Cache Types by Location
 
-### Writing strategies
+**1. Client-Side Caching**
 
-- Write-through cache: data is written to both the cache and the primary data source simultaneously.
-  Optimizes write performance but may introduce latency due to synchronous writes.
-- Write-back cache: data is initially written only to the cache and asynchronously written to the primary data source.
-  Improves write performance by decoupling write operations from primary storage but carries a risk of data loss or inconsistency.
-- Write-around cache: data is written directly to the primary data source and only the data which is read is stored in the cache.
-  Prevents cache pollution with infrequently accessed data but may increase read latency for data not present in the cache.
+- **Browser Cache**: Stores static assets (CSS, JS, images)
+- **Application Cache**: Mobile apps, desktop applications
+- **Benefits**: Reduced server requests, offline capability
+- **Challenges**: Limited control, cache size constraints
 
-### Read strategies
+**2. Server-Side Caching**
 
-- Read-through cache: automatically retrieves data from the cache if available (cache hit), fetching from the primary data source only when not (cache miss) then cache the missing data before return it to the client.
-  Optimizes read performance by minimizing cache misses but may introduce latency for cache misses, data that has never been cached before, especially if fetching data from the primary source is slow and lacks control over caching policies.
-- Cache-aside (lazy loading): requires explicit management by the application, which decides when to retrieve data from the cache or the primary data source based on cache misses.
-  Offers flexibility and control over caching decisions but requires additional code complexity and risks cache inconsistency without careful management.
+- **In-Memory Cache**: Redis, Memcached - fastest access
+- **Application Cache**: Within application process (local cache)
+- **Benefits**: Full control, consistent performance
+- **Challenges**: Memory limitations
 
-The main differences between read-through and cache-aside are:
+**3. Distributed Caching**
 
-- In a cache-aside strategy the application is responsible for fetching the data and populating the cache, while in a read-through, the logic is done automatically by a library or by the cache itself.
-- Unlike cache-aside, the data model in read-through cache cannot be different than that of the database.
+- **Multi-node cache clusters**: Data spread across nodes
+- **Benefits**: Scalability, fault tolerance
+- **Challenges**: Network latency, consistency complexity
 
-## Caching eviction policies
+**4. Web Caching**
 
-Eviction policies determine which items are removed from the cache when it reaches capacity.
+- **CDN (Content Delivery Network)**: Geographic distribution
+- **Reverse Proxy**: Nginx, Varnish
+- **Benefits**: Global performance, reduced origin load
+- **Challenges**: Cache invalidation across nodes
 
-- Least recently used (LRU): evicts the least recently used items and is typically implemented using a timestamp for last access.
-- Most recently used (MRU): evicts the most recently used items. It is the opposite of least recently used (LRU) policy.
-- Least frequently used (LFU): evicts the least frequently accessed items and is typically implemented using a number of accesses counter.
+## Cache Invalidation Strategies
 
-## External references
+Managing data freshness is one of the hardest problems in caching.
+
+```mermaid
+graph TD
+    A[Cache Invalidation Strategies] --> B[Time-Based TTL]
+    A --> C[Write-Through]
+    A --> D[Write-Behind] 
+    A --> E[Event-Based]
+    
+    B --> F[Simple but inexact]
+    C --> G[Immediate consistency]
+    D --> H[Better performance]
+    E --> I[Precise invalidation]
+```
+
+### Invalidation Approaches
+
+**1. Time-To-Live (TTL)**
+
+- Set expiration time for cached data
+- ✅ Simple to implement
+- ❌ May serve stale data or invalidate fresh data
+
+**2. Write-Through Invalidation**
+
+- Update cache immediately when data changes
+- ✅ Data always fresh
+- ❌ Higher write latency
+
+**3. Write-Behind Invalidation**
+
+- Invalidate cache, update database asynchronously
+- ✅ Lower write latency
+- ❌ Risk of data loss
+
+**4. Event-Based Invalidation**
+
+- Publish events when data changes
+- ✅ Precise invalidation
+- ❌ Complex to implement
+
+**5. Versioning**
+
+- Associate version numbers with cached data
+- ✅ Prevents serving stale data
+- ❌ Additional metadata overhead
+
+## Caching Patterns
+
+Different patterns for reading and writing cached data, each with specific use cases and trade-offs.
+
+### Write Patterns
+
+```mermaid
+sequenceDiagram
+    participant A as Application
+    participant C as Cache
+    participant D as Database
+    
+    Note over A,D: Write-Through
+    A->>C: Write data
+    C->>D: Write data
+    D->>C: Confirm
+    C->>A: Confirm
+    
+    Note over A,D: Write-Behind
+    A->>C: Write data
+    C->>A: Confirm (immediate)
+    C->>D: Write data (async)
+    
+    Note over A,D: Write-Around
+    A->>D: Write data
+    D->>A: Confirm
+    Note over C: Cache not updated
+```
+
+**Write-Through**
+
+- Write to cache and database simultaneously
+- ✅ Data consistency guaranteed
+- ✅ Cache always fresh
+- ❌ Higher write latency
+- **Use case**: Critical data, strong consistency needs
+
+**Write-Behind (Write-Back)**
+
+- Write to cache immediately, database asynchronously
+- ✅ Lower write latency
+- ✅ Better write performance
+- ❌ Risk of data loss
+- **Use case**: High write loads, eventual consistency acceptable
+
+**Write-Around**
+
+- Write directly to database, bypass cache. The cache is only populated if the same data is subsequently read.
+- ✅ Prevents cache pollution
+- ✅ Good for infrequently read data
+- ❌ Cache misses on subsequent reads
+- **Use case**: Write-heavy workloads with rare reads
+
+### Read Patterns
+
+```mermaid
+sequenceDiagram
+    participant A as Application
+    participant C as Cache
+    participant D as Database
+    
+    Note over A,D: Cache-Aside (Lazy Loading)
+    A->>C: Check cache
+    C->>A: Cache miss
+    A->>D: Read data
+    D->>A: Return data
+    A->>C: Store in cache
+    
+    Note over A,D: Read-Through
+    A->>C: Request data
+    C->>D: Fetch if missing
+    D->>C: Return data
+    C->>A: Return data (cached)
+```
+
+**Cache-Aside (Lazy Loading)**
+
+- Application manages cache manually
+- ✅ Full control over caching logic
+- ✅ Flexible data transformation
+- ❌ Code complexity increases
+- **Use case**: Custom caching logic, data transformation needed
+
+**Read-Through**
+
+- The caching layer automatically queries the database, populates itself with the data, and then returns the data to the application.
+- ✅ Simplified application code
+- ✅ Automatic cache population
+- ❌ Limited flexibility
+- **Use case**: Simple caching, no data transformation
+
+## Cache Eviction Policies
+
+When cache reaches capacity, eviction policies determine which data to remove.
+
+```mermaid
+graph TD
+    A[Cache Full] --> B{Eviction Policy}
+    B --> C[LRU<br/>Remove oldest access]
+    B --> D[LFU<br/>Remove least frequent]
+    B --> E[FIFO<br/>Remove oldest entry]
+    B --> F[Random<br/>Remove random entry]
+    B --> G[TTL<br/>Remove expired entries]
+```
+
+### Common Eviction Algorithms
+
+| Policy     | How it Works                  | Best For                           | Implementation               |
+|------------|-------------------------------|------------------------------------|------------------------------|
+| **LRU**    | Removes least recently used   | General purpose, temporal locality | Doubly-linked list + HashMap |
+| **LFU**    | Removes least frequently used | Stable access patterns             | Counter + Min-heap           |
+| **FIFO**   | Removes oldest entries        | Simple, predictable behavior       | Queue                        |
+| **Random** | Removes random entries        | Low overhead, simple               | Random selection             |
+| **TTL**    | Removes expired entries       | Time-sensitive data                | Timer-based cleanup          |
+
+### Advanced Eviction Strategies
+
+- **Adaptive Replacement Cache (ARC)**: Balances between LRU and LFU
+- **Clock Algorithm**: Approximates LRU with less overhead
+- **W-TinyLFU**: Window-based LFU with bloom filters
+
+## Further References
 
 - [Caching Best Practices](https://aws.amazon.com/caching/best-practices/)
 - [Introduction to Database Caching](https://www.prisma.io/dataguide/managing-databases/introduction-database-caching)
 - [Cache Eviction Policies](https://www.codecademy.com/article/cache-eviction-policies)
 - [The Complexity of Caching](https://codeopinion.com/the-complexity-of-caching/)
 - [Cache invalidation isn’t a hard problem](https://codeopinion.com/cache-invalidation-isnt-a-hard-problem/)
+- [Cache-Friendly Code](https://gameprogrammingpatterns.com/data-locality.html)

@@ -1,76 +1,228 @@
 # Hashing
 
-Hashing is a process of converting input data, or keys, into a fixed-size value or hash code. It's a one-way function, meaning it's practically impossible to reverse-engineer the original input from the hash.
+Hashing transforms input data into fixed-size values through mathematical functions.
 
-## Popular hashing algorithms
+In distributed systems, hashing is crucial for data distribution, load balancing, and consistent partitioning across multiple nodes.
 
-- Message Digest Algorithm 5 (MD5): Produces a 128-bit hash value. Widely used but considered weak for security purposes due to vulnerabilities.
-- Secure Hash Algorithm (SHA) family: Includes SHA-1, SHA-256, SHA-512, SHA-3, and others. These algorithms produce hash values of varying lengths and are widely used for cryptographic applications due to their stronger resistance to collisions compared to MD5 and SHA-1.
+**Key Properties:**
 
-## Hashing uniformity
+- **Deterministic**: Same input always produces same output
+- **Uniform Distribution**: Hash values spread evenly across output space
+- **Fixed Output Size**: Consistent hash length regardless of input size
+- **Avalanche Effect**: Small input changes cause large output changes
 
-Hashing uniformity refers to the ability of a hashing function to evenly distribute data values over its output hash space. A good hashing algorithm should aim for uniformity to minimize collisions and ensure efficient storage for its output hash space.
+## Cryptographic Hash Functions
 
-## Hashing techniques
+**Purpose**: Security, integrity verification, digital signatures
 
-- Consistent hashing: used in distributed systems, particularly for load balancing and caching. It ensures that when the hash table is resized, only a minimal number of keys need to be remapped.
+| Algorithm | Output Size | Security | Use Cases |
+|-----------|-------------|----------|-----------|
+| **MD5** | 128-bit | ❌ Broken | Legacy systems only |
+| **SHA-1** | 160-bit | ❌ Deprecated | Avoid for new systems |
+| **SHA-256** | 256-bit | ✅ Secure | Digital signatures, blockchain |
+| **SHA-3** | Variable | ✅ Latest standard | Modern cryptographic applications |
 
-Pseudocode example for the implemention:
+## Non-Cryptographic Hash Functions
 
-```python
-def hash(key):
-  # Hash function to convert a key to a hash value
-  # This could be MD5, SHA-1, or any other suitable hash function
-  pass
+**Purpose**: Fast hashing for data structures, load balancing
 
-def add_node(node):
-  for i in range(replicas):
-    hash_value = hash(node.id + i)
-    hash_ring[hash_value] = node
+| Algorithm | Speed | Quality | Use Cases |
+|-----------|-------|---------|-----------|
+| **MurmurHash** | Very Fast | Good | Hash tables, caches |
+| **CityHash** | Fast | Good | Google's general-purpose hashing |
+| **xxHash** | Extremely Fast | Excellent | High-performance applications |
 
-def delete_node(node):
-    for i in range(replicas):
-      hash_value = hash(node.id + i)
-      if hash_value in hash_ring:
-        del hash_ring[hash_value]
+**Trade-offs:**
 
-def get_node_for_key(key):
-    hash_value = hash(key)
+- ✅ Much faster than cryptographic hashes
+- ✅ Good distribution properties
+- ❌ Not secure against malicious attacks
+- ❌ Not suitable for security purposes
 
-    # Find the nearest node clockwise on the hash ring
-    for hash_key in sorted(hash_ring.keys()):
-      if hash_key >= hash_value:
-        return hash_ring[hash_key]
-  
-    # If no node is found, return the first node in the ring
-    return hash_ring[list(hash_ring.keys())[0]]
+## Hash Distribution and Uniformity
+
+Good hash functions distribute values uniformly across the output space to minimize collisions and ensure balanced load distribution.
+
+**Factors Affecting Distribution:**
+
+- **Input Data Patterns**: Real-world data often has patterns that can cause skew
+- **Hash Function Quality**: Poor functions create clustering
+- **Output Space Size**: Larger spaces reduce collision probability
+
+## Distributed Hashing Techniques
+
+Hashing in distributed systems requires special considerations for node changes and data rebalancing.
+
+## Consistent Hashing
+
+Consistent hashing solves the redistribution problem when nodes are added or removed from a distributed system.
+
+### Traditional Hashing Problems
+
+```mermaid
+graph TD
+    A[Traditional Hashing] --> B[hash key % N nodes]
+    B --> C[Add/Remove Node]
+    C --> D[N changes]
+    D --> E[Most keys remapped<br/>Massive redistribution]
 ```
 
-- Rendezvous hashing (or Highest Random Weight): a variation of consistent hashing where each node in the system computes a preference list based on the hash values of the keys and chooses the key it prefers the most (e.g. highest weight).
+**Problem**: When servers change, `hash(key) % server_count` changes for most keys, causing massive data movement.
 
-Pseudocode example for the implemention:
+### Consistent Hashing Solution
+
+**Benefits:**
+
+- ✅ Adding/removing nodes only affects adjacent keys
+- ✅ Minimal data redistribution (O(K/N) keys affected)
+- ✅ Maintains load balance with virtual nodes
+
+### Implementation Details
+
+**Virtual Nodes (Replicas)**
+To improve load distribution, each physical node is mapped to multiple positions on the ring.
+
+```mermaid
+graph TD
+    A[Physical Server A] --> B[Virtual Node A1<br/>Position: 50]
+    A --> C[Virtual Node A2<br/>Position: 150]
+    A --> D[Virtual Node A3<br/>Position: 250]
+```
+
+**Kind of like this Implementation:**
 
 ```python
-def calculate_hash(key, node):
-    # Function to calculate the hash value for a key and node
-    # Example: return hash(key + node)
-    pass
+class ConsistentHash:
+    def __init__(self, replicas=3):
+        self.replicas = replicas
+        self.ring = {}
+        self.sorted_keys = []
+    
+    def add_node(self, node):
+        for i in range(self.replicas):
+            key = self.hash(f"{node}:{i}")
+            self.ring[key] = node
+            self.sorted_keys.append(key)
+        self.sorted_keys.sort()
+    
+    def remove_node(self, node):
+        for i in range(self.replicas):
+            key = self.hash(f"{node}:{i}")
+            del self.ring[key]
+            self.sorted_keys.remove(key)
+    
+    def get_node(self, key):
+        if not self.ring:
+            return None
+        
+        hash_key = self.hash(key)
+        # Find first node clockwise
+        for node_key in self.sorted_keys:
+            if node_key >= hash_key:
+                return self.ring[node_key]
+        # Wrap around to first node
+        return self.ring[self.sorted_keys[0]]
+```
 
-def get_node_for_key(key, nodes):
+## Rendezvous Hashing (HRW)
+
+Alternative approach where each node computes a weight for each key, and the highest weight wins.
+
+```mermaid
+graph TD
+    A[Key: user123] --> B[Calculate Weight with Each Node]
+    B --> C[Node A: hash user123+nodeA = 0.7]
+    B --> D[Node B: hash user123+nodeB = 0.3]
+    B --> E[Node C: hash user123+nodeC = 0.9]
+    E --> F[Highest Weight Wins<br/>Route to Node C]
+```
+
+**Kind of like this Implementation:**
+
+```python
+def get_node_hrw(key, nodes):
     max_weight = -1
     selected_node = None
-
-    # Find the node with the highest weight
+    
     for node in nodes:
-        weight = calculate_hash(key, node)
+        # Combine key and node, then hash
+        weight = hash(f"{key}:{node}")
         if weight > max_weight:
             max_weight = weight
             selected_node = node
+    
     return selected_node
 ```
 
-## External references
+**Rendezvous vs Consistent Hashing:**
 
-- [Hashing Algorithms](https://jscrambler.com/blog/hashing-algorithms)
-- [A Guide to Consistent Hashing](https://www.toptal.com/big-data/consistent-hashing)
-- [Consistent Hashing: Algorithmic Tradeoffs](https://dgryski.medium.com/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8)
+| Aspect           | Consistent Hashing             | Rendezvous Hashing                 |
+|------------------|--------------------------------|------------------------------------|
+| **Simplicity**   | More complex (ring management) | Simpler (direct calculation)       |
+| **Performance**  | O(log N) lookup                | O(N) calculation per lookup        |
+| **Load Balance** | Good (with virtual nodes)      | Excellent (mathematically uniform) |
+| **Node Changes** | Minimal redistribution         | Minimal redistribution             |
+| **Use Cases**    | Large-scale systems            | Smaller node counts                |
+
+## Real-World Applications
+
+### Database Sharding
+
+```mermaid
+graph LR
+    A[User Request<br/>user_id: 12345] --> B[Hash Function]
+    B --> C[Shard 1<br/>Users 0-1000]
+    B --> D[Shard 2<br/>Users 1001-2000]
+    B --> E[Shard 3<br/>Users 2001-3000]
+```
+
+**Use Cases:**
+
+- **Distributed Databases**: MongoDB, Cassandra use consistent hashing for data distribution
+- **Caching Systems**: Redis Cluster, Memcached distribute cache entries
+- **Load Balancing**: Route requests to backend servers
+- **CDN Edge Selection**: Choose nearest edge server for content delivery
+
+## Performance Considerations
+
+### Hash Function Selection
+
+**For Security:**
+
+- Use SHA-256 or SHA-3 for cryptographic needs
+- Avoid MD5 and SHA-1 for new applications
+
+**For Performance:**
+
+- Use MurmurHash3 or xxHash for non-cryptographic needs
+- Consider CityHash for Google-compatible systems
+
+**For Distributed Systems:**
+
+- Consistent hashing for dynamic node environments
+- Rendezvous hashing for smaller, stable clusters
+
+### Common Pitfalls
+
+**Poor Hash Distribution:**
+
+- Using sequential keys can create hotspots
+- Consider adding randomness or using compound keys
+
+**Node Imbalance:**
+
+- Use sufficient virtual nodes (100-200 per physical node)
+- Monitor and adjust based on actual load patterns
+
+**Cascading Failures:**
+
+- Implement health checks and failover mechanisms
+- Use multiple hash rings for redundancy
+
+## Further References
+
+- [Hashing Algorithms Overview](https://jscrambler.com/blog/hashing-algorithms)
+- [Consistent Hashing Deep Dive](https://www.toptal.com/big-data/consistent-hashing)  
+- [Consistent Hashing Tradeoffs](https://dgryski.medium.com/consistent-hashing-algorithmic-tradeoffs-ef6b8e2fcae8)
+- [Amazon DynamoDB Partitioning](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.Partitions.html)
+- [Cassandra Dataset Partitioning using Consistent Hashing](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html#dataset-partitioning-consistent-hashing)

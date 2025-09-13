@@ -1,178 +1,359 @@
 # Rate Limiting
 
-Rate limiting is a technique used to control the rate at which users or clients can make requests to a service
+Rate limiting controls the frequency of requests from clients to protect services from abuse, ensure fair resource usage, and maintain system stability.
 
-## Use cases
+## Use Cases
 
-Rate limiting is an effective measure against several types of attacks and abuse, including:
+**Security & Abuse Prevention**
 
-- Denial of Service (DoS) attacks: limiting the number of requests a client can make.
-- Brute force attacks: it helps in preventing attackers from trying multiple combinations of credentials or keys in a short time.
-- Web scraping: it reduces the effectiveness of automated scripts that scrape data from a website.
-- Inventory hoarding attacks: limiting the number of requests for a particular item or resource can thwart inventory hoarding attacks, where attackers try to purchase all available inventory of a popular item to resell at a higher price.
+- **DoS Protection**: Limit requests to prevent service disruption
+- **Brute Force Prevention**: Restrict login attempts and credential testing
+- **API Abuse**: Prevent excessive API usage and scraping
+- **Bot Protection**: Distinguish between human and automated traffic
 
-## Types
+**Resource Management**
 
-- User-based rate limiting: limits the number of requests a single user can make in a given timeframe.
-- IP-based rate limiting: limits the number of requests from a particular IP address.
-- Geographical rate limiting: limits the number of requests based on the geographical location of the request.
-- Service/endpoint-based rate limiting: limits the number of requests to a particular service or API endpoint.
+- **Fair Usage**: Ensure equitable access to shared resources
+- **Cost Control**: Manage infrastructure costs and resource consumption
+- **Performance**: Maintain system responsiveness under load
+- **Quota Enforcement**: Implement usage limits and billing tiers
 
-## Algorithms
+**Business Logic**
 
-### Fixed window counter algorithm
+- **Inventory Protection**: Prevent hoarding of limited items
+- **Feature Gating**: Control access to premium features
+- **A/B Testing**: Limit exposure to experimental features
+- **Geographic Restrictions**: Implement region-specific limits
 
-Limits the number of requests received within a fixed time window, such as one minute. Once the maximum number of requests is reached, additional requests are rejected until the next window begins.
+## Rate Limiting Strategies
 
-Pros: simple to implement.
-Cons: can lead to uneven traffic distribution (e.g., bursts at the start of each window).
+### By Identity
 
-Steps:
+**User-Based Rate Limiting**
 
-1. Determine the current window based on the current time and window size.
-2. Generate a key for the current window.
-3. Check the count of requests for the current window in Redis.
-4. If the count is within the limit, increment the count and allow the request.
-5. If the count exceeds the limit, deny the request.
+- Limits requests per authenticated user
+- Tied to user accounts and sessions
+- Enables personalized quotas and billing tiers
+- **Use Cases**: API quotas, premium features, user-specific limits
+
+**IP-Based Rate Limiting**
+
+- Limits requests per IP address
+- Simple to implement and deploy
+- Can affect multiple users behind same IP
+- **Use Cases**: DoS protection, geographic restrictions, network-level limits
+
+**API Key-Based Rate Limiting**
+
+- Limits requests per API key or token
+- Enables different limits for different clients
+- Supports tiered access and billing
+- **Use Cases**: Third-party integrations, developer APIs, service accounts
+
+### By Scope
+
+**Endpoint-Based Rate Limiting**
+
+- Different limits for different API endpoints
+- Protects expensive operations
+- Enables fine-grained control
+- **Use Cases**: Read vs write operations, expensive computations, resource-intensive endpoints
+
+**Service-Based Rate Limiting**
+
+- Limits across entire services or applications
+- Protects shared resources
+- Simpler to manage at scale
+- **Use Cases**: Microservices, shared databases, external service calls
+
+**Geographic Rate Limiting**
+
+- Limits based on client location
+- Enables region-specific policies
+- Compliance with local regulations
+- **Use Cases**: Data sovereignty, regional restrictions, compliance requirements
+
+### By Implementation
+
+**Client-Side Rate Limiting**
+
+- Implemented in client applications
+- Reduces server load
+- Can be bypassed by malicious clients
+- **Use Cases**: Mobile apps, desktop applications, browser extensions
+
+**Server-Side Rate Limiting**
+
+- Implemented at server or gateway level
+- Cannot be bypassed by clients
+- Centralized control and monitoring
+- **Use Cases**: APIs, web services, microservices
+
+**Distributed Rate Limiting**
+
+- Shared state across multiple servers
+- Consistent limits across distributed systems
+- Requires coordination mechanism
+- **Use Cases**: Load-balanced services, microservices, distributed systems
+
+## Rate Limiting Algorithms
+
+Different algorithms provide various trade-offs between accuracy, memory usage, and implementation complexity.
+
+### Fixed Window Counter
+
+Limits requests within fixed time windows (e.g., 100 requests per minute).
+
+```mermaid
+graph LR
+    A[Window 1<br/>0-60s<br/>Count: 95/100] --> B[Window 2<br/>60-120s<br/>Count: 0/100]
+    B --> C[Window 3<br/>120-180s<br/>Count: 0/100]
+    
+    D[Request at 59s] --> E[Window 1: Allow]
+    F[Request at 61s] --> G[Window 2: Allow]
+```
+
+**How it Works**:
+
+1. Divide time into fixed windows (e.g., 1-minute intervals)
+2. Count requests within each window
+3. Allow requests if count < limit, reject otherwise
+4. Reset counter at window boundary
+
+**Implementation**:
 
 ```python
 import time
 
 def fixed_window_rate_limit(user_id, max_requests, window_size):
-  current_time = int(time.time())
-  current_window = current_time // window_size
-  key = f"{user_id}:{current_window}"
-
-  current_count = redis.get(key)
-
-  if current_count is None:
-    redis.set(key, 1, ex=window_size)
-    return True
-  elif int(current_count) < max_requests:
-    redis.incr(key)
-    return True
-  else:
-    return False
+    current_time = int(time.time())
+    current_window = current_time // window_size
+    key = f"{user_id}:{current_window}"
+    
+    current_count = redis.get(key)
+    
+    if current_count is None:
+        redis.set(key, 1, ex=window_size)
+        return True
+    elif int(current_count) < max_requests:
+        redis.incr(key)
+        return True
+    else:
+        return False
 ```
 
-### Sliding window counter algorithm
+**Trade-offs**:
 
-Similar to the fixed window algorithm, but the window moves forward in time, providing a more granular and even distribution of requests.
+- ✅ Simple to implement and understand
+- ✅ Low memory usage
+- ✅ Predictable behavior
+- ❌ Burst traffic at window boundaries
+- ❌ Uneven distribution within windows
 
-Pros: more accurate rate limiting compared to fixed window.
-Cons: slightly more complex to implement.
+### Sliding Window Counter
 
-Steps:
+Provides more accurate rate limiting by maintaining a rolling window of request timestamps.
 
-1. Determine the current time in milliseconds.
-2. Generate keys for the current and previous intervals.
-3. Remove expired timestamps from Redis.
-4. Count the number of requests in the current window.
-5. If the count is within the limit, add the current timestamp and allow the request.
-6. If the count exceeds the limit, deny the request
+```mermaid
+graph LR
+    A[Sliding Window<br/>60s duration] --> B[Request Timestamps]
+    B --> C[0s: Request 1]
+    B --> D[30s: Request 2]
+    B --> E[60s: Request 3]
+  
+    H[Current Time: 75s] --> I[Remove timestamps < 15s]
+    I --> J[Count remaining: 2/3]
+```
+
+**How it Works**:
+
+1. Store timestamps of all requests in sorted set
+2. Remove timestamps outside the sliding window
+3. Count remaining timestamps
+4. Allow request if count < limit
+
+**Implementation**:
 
 ```python
 def sliding_window_rate_limit(user_id, max_requests, window_size):
-  current_time = int(time.time() * 1000)
-  key = f"{user_id}:timestamps"
-
-  # Remove timestamps that are older than the window_size
-  redis_client.zremrangebyscore(key, 0, current_time - window_size)
-
-  current_count = redis_client.zcard(key)
-  
-  if current_count < max_requests:
-    redis_client.zadd(key, {current_time: current_time})
-    redis_client.expire(key, window_size // 1000)  # Expire the key after the window size in seconds
-    return True
-  else:
-    return False
+    current_time = int(time.time() * 1000)
+    key = f"{user_id}:timestamps"
+    
+    # Remove expired timestamps
+    redis_client.zremrangebyscore(key, 0, current_time - window_size)
+    
+    current_count = redis_client.zcard(key)
+    
+    if current_count < max_requests:
+        redis_client.zadd(key, {current_time: current_time})
+        redis_client.expire(key, window_size // 1000)
+        return True
+    else:
+        return False
 ```
 
-### Token bucket algorithm
+**Trade-offs**:
 
-A bucket holds a fixed number of tokens, and each request consumes a token. Tokens are added to the bucket at a fixed rate.
+- ✅ More accurate than fixed window
+- ✅ Smoother traffic distribution
+- ✅ No burst at window boundaries
+- ❌ Higher memory usage (stores timestamps)
+- ❌ More complex implementation
 
-Pros: allows bursts of traffic while maintaining a steady rate of requests over time.
-Cons: requires careful tuning of token addition rate and bucket size.
+### Token Bucket Algorithm
 
-Steps:
+Allows burst traffic while maintaining average rate limits through token-based consumption.
 
-1. Maintains a count of tokens and the last refill timestamp.
-2. Adds new tokens based on the elapsed time since the last refill.
-3. If tokens are available, it consumes one and updates the token count and timestamp.
-4. Denies the request if no tokens are available.
+```mermaid
+graph TD
+    subgraph Token Bucket
+      A[Bucket Capacity: 10 tokens]
+      B[Refill Rate: 2 tokens/sec]
+    end
+
+    C[Request 1] --> D[Consume 1 token<br/>Remaining: 9]
+    E[Request 2] --> F[Consume 1 token<br/>Remaining: 8]
+    G[Burst: 5 requests] --> H[Consume 5 tokens<br/>Remaining: 3]
+    
+    I[Time passes] --> J[Refill 2 tokens<br/>Total: 5]
+```
+
+**How it Works**:
+
+1. Bucket has fixed capacity (max tokens)
+2. Tokens are added at constant rate
+3. Each request consumes one token
+4. Allow request if tokens available, reject otherwise
+
+**Implementation**:
 
 ```python
 import time
 import math
 
-def token_bucket_rate_limit(user_id, max_tokens, refill_time, refill_amount, window_size):
-  key_tokens = f"{user_id}:tokens"
-  key_timestamp = f"{user_id}:last_refill_timestamp"
-
-  current_time = int(time.time())
-  current_tokens = redis.get(key_tokens)
-  last_refill_timestamp = redis.get(key_timestamp)
-
-  current_tokens = int(current_tokens) if current_tokens else max_tokens
-  last_refill_timestamp = int(last_refill_timestamp) if last_refill_timestamp else current_time
-
-  refill_count = math.floor((current_time - last_refill_timestamp) / refill_time)
-
-  new_tokens = min(max_tokens, current_tokens + (refill_count * refill_amount))
-  new_refill_timestamp = min(current_time, last_refill_timestamp + (refill_count * refill_time))
-
-  if new_tokens > 0:
-    redis.set(key_tokens, new_tokens - 1, ex=window_size)
-    redis.set(key_timestamp, new_refill_timestamp, ex=window_size)
-    return True
-  else:
-    return False
+def token_bucket_rate_limit(user_id, max_tokens, refill_rate, window_size):
+    key_tokens = f"{user_id}:tokens"
+    key_timestamp = f"{user_id}:last_refill"
+    
+    current_time = time.time()
+    current_tokens = redis.get(key_tokens)
+    last_refill = redis.get(key_timestamp)
+    
+    current_tokens = float(current_tokens) if current_tokens else max_tokens
+    last_refill = float(last_refill) if last_refill else current_time
+    
+    # Calculate tokens to add based on elapsed time
+    elapsed = current_time - last_refill
+    tokens_to_add = elapsed * refill_rate
+    new_tokens = min(max_tokens, current_tokens + tokens_to_add)
+    
+    if new_tokens >= 1:
+        redis.set(key_tokens, new_tokens - 1, ex=window_size)
+        redis.set(key_timestamp, current_time, ex=window_size)
+        return True
+    else:
+        return False
 ```
 
-### Leaky bucket algorithm
+**Trade-offs**:
 
-Similar to the token bucket algorithm, but requests enter a bucket at any rate, but they are processed (or leaked) at a fixed rate.
+- ✅ Allows burst traffic
+- ✅ Smooth average rate over time
+- ✅ Flexible for varying traffic patterns
+- ❌ Complex to tune parameters
+- ❌ Memory overhead for token tracking
 
-If the rate at which requests arrive in the bucket is greater than the rate at which requests are processed (leaked from the bucket), the bucket will fill up and further requests will be dropped until there is space in the bucket.
+### Leaky Bucket Algorithm
 
-Pros: smoothens out burst traffic, ensuring a consistent and controlled rate of processing.
-Cons: may introduce latency if bursts are large.
+Smooths burst traffic by processing requests at a fixed rate, regardless of arrival rate.
 
-Steps:
+```mermaid
+graph TD
+    subgraph Leaky Bucket
+        A[Bucket Capacity: 10 requests]
+        B[Leak Rate: 2 requests/second]
+    end
+    
+    C[Burst: 8 requests] --> D[Add to bucket<br/>Total: 8/10]
+    E[Time: 1 second] --> F[Leak 2 requests<br/>Remaining: 6]
+    G[Time: 2 seconds] --> H[Leak 2 requests<br/>Remaining: 4]
+    
+    I[New burst: 7 requests] --> J[Add 6 requests<br/>Total: 10/10]
+    K[Overflow: 1 request] --> L[Drop request]
+```
 
-1. Tracks the number of requests and the last checked timestamp.
-2. Calculates the number of leaked requests based on the elapsed time and leak rate.
-3. Updates the request count by subtracting the leaked requests.
-4. Adds a new request if within the limit, otherwise denies the request.
+**How it Works**:
+
+1. Requests enter bucket at any rate
+2. Bucket leaks requests at fixed rate
+3. Allow request if bucket not full
+4. Drop requests when bucket overflows
+
+**Implementation**:
 
 ```python
 def leaky_bucket_rate_limit(user_id, max_requests, leak_rate, window_size):
-  key_requests = f"{user_id}:requests"
-  key_timestamp = f"{user_id}:last_checked_timestamp"
-
-  current_time = int(time.time())
-  current_requests = redis.get(key_requests)
-  last_checked_timestamp = redis.get(key_timestamp)
-
-  current_requests = int(current_requests) if current_requests else 0
-  last_checked_timestamp = int(last_checked_timestamp) if last_checked_timestamp else current_time
-  
-  elapsed_time = current_time - last_checked_timestamp
-  leaked_requests = elapsed_time * leak_rate
-  new_requests = max(0, current_requests - leaked_requests)
-
-  if new_requests < max_requests:
-    redis.set(key_requests, new_requests + 1, ex=window_size)
-    redis.set(key_timestamp, current_time, ex=window_size)
-    return True
-  else:
-    return False
+    key_requests = f"{user_id}:requests"
+    key_timestamp = f"{user_id}:last_checked"
+    
+    current_time = time.time()
+    current_requests = redis.get(key_requests)
+    last_checked = redis.get(key_timestamp)
+    
+    current_requests = float(current_requests) if current_requests else 0
+    last_checked = float(last_checked) if last_checked else current_time
+    
+    # Calculate leaked requests
+    elapsed = current_time - last_checked
+    leaked = elapsed * leak_rate
+    new_requests = max(0, current_requests - leaked)
+    
+    if new_requests < max_requests:
+        redis.set(key_requests, new_requests + 1, ex=window_size)
+        redis.set(key_timestamp, current_time, ex=window_size)
+        return True
+    else:
+        return False
 ```
 
-## External references
+**Trade-offs**:
 
-- [Rate Limiting Defined](https://redis.io/glossary/rate-limiting/)
-- [Distributed API Rate Limiter](https://systemsdesign.cloud/SystemDesign/RateLimiter)
-- [Why, where, and when should we throttle or rate limit?](https://www.youtube.com/watch?v=CW4gVlU0xtU&ab_channel=ArpitBhayani)
+- ✅ Smooths burst traffic
+- ✅ Predictable output rate
+- ✅ Simple to implement
+- ❌ May drop requests during bursts
+- ❌ Can introduce latency
+
+## Algorithm Comparison
+
+| Algorithm          | Accuracy | Memory | Burst Handling | Complexity | Best For          |
+|--------------------|----------|--------|----------------|------------|-------------------|
+| **Fixed Window**   | Low      | Low    | Poor           | Low        | Simple use cases  |
+| **Sliding Window** | High     | High   | Good           | Medium     | Accurate limiting |
+| **Token Bucket**   | Medium   | Medium | Excellent      | Medium     | Burst-friendly    |
+| **Leaky Bucket**   | Medium   | Low    | Poor           | Low        | Smooth output     |
+
+## Rate Limiting Headers
+
+**Standard Headers**:
+
+```plaintext
+X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1640995200
+X-RateLimit-Retry-After: 60
+```
+
+**HTTP Status Codes**:
+
+- `429 Too Many Requests`: Rate limit exceeded
+- `503 Service Unavailable`: Temporary rate limiting
+- `200 OK`: Request allowed
+
+## Further References
+
+- [Rate Limiting Strategies](https://redis.io/glossary/rate-limiting/)
+- [Distributed Rate Limiting](https://systemsdesign.cloud/SystemDesign/RateLimiter)
+- [Rate Limiting Best Practices](https://www.youtube.com/watch?v=CW4gVlU0xtU&ab_channel=ArpitBhayani)
+- [Sliding Window Rate Limiting](https://blog.cloudflare.com/counting-things-a-lot-of-different-things/)
+- [Token Bucket vs Leaky Bucket](https://www.nginx.com/blog/rate-limiting-nginx/)

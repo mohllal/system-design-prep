@@ -288,7 +288,7 @@ def process_order(order_id, amount):
 - Asynchronous job processing
 - Request-response patterns
 
-## Further References
+## Reference Materials
 
 - [Pub/Sub Pattern Explained](https://redis.io/glossary/pub-sub/)
 - [Pub/Sub vs Message Queues](https://www.youtube.com/watch?v=DXTHb9TqJOs&ab_channel=HusseinNasser)

@@ -350,7 +350,7 @@ X-RateLimit-Retry-After: 60
 - `503 Service Unavailable`: Temporary rate limiting
 - `200 OK`: Request allowed
 
-## Further References
+## Reference Materials
 
 - [Rate Limiting Strategies](https://redis.io/glossary/rate-limiting/)
 - [Distributed Rate Limiting](https://systemsdesign.cloud/SystemDesign/RateLimiter)

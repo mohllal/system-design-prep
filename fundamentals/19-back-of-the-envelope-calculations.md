@@ -589,7 +589,7 @@ $$
 - ❌ Not considering data growth
 - ❌ Overlooking operational overhead
 
-## Further References
+## Reference Materials
 
 - [Latency Numbers Every Programmer Should Know](https://colin-scott.github.io/personal_website/research/interactive_latency.html)
 - [Back-of-the-Envelope Calculation Guide](https://www.designgurus.io/blog/back-of-the-envelope-system-design-interview)

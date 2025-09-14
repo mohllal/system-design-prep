@@ -111,7 +111,7 @@ graph TD
 **Load Testing**: Verifying system behavior under stress
 **Failure Mode and Effect Analysis (FMEA)**: Identifying potential points of failure
 
-## Further References
+## Reference Materials
 
 - [High Availability Wikipedia](https://en.wikipedia.org/wiki/High_availability)
 - [The Calculus of Service Availability](https://queue.acm.org/detail.cfm?id=3096459)

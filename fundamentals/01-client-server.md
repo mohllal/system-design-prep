@@ -278,7 +278,7 @@ graph LR
 **GraphQL**: Complex data requirements, mobile clients, API aggregation
 **Message Queues**: Decoupling services, reliability important, async processing
 
-## Further References
+## Reference Materials
 
 - [What is DNS?](https://aws.amazon.com/route53/what-is-dns)
 - [WebSockets vs Server-Sent-Events vs Long-Polling vs WebRTC vs WebTransport](https://rxdb.info/articles/websockets-sse-polling-webrtc-webtransport.html)

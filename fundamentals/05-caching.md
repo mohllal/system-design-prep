@@ -233,7 +233,7 @@ graph TD
 - **Clock Algorithm**: Approximates LRU with less overhead
 - **W-TinyLFU**: Window-based LFU with bloom filters
 
-## Further References
+## Reference Materials
 
 - [Caching Best Practices](https://aws.amazon.com/caching/best-practices/)
 - [Introduction to Database Caching](https://www.prisma.io/dataguide/managing-databases/introduction-database-caching)

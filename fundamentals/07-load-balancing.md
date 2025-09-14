@@ -222,7 +222,7 @@ graph TD
 | **Performance critical**  | Least Response Time   | Optimizes for latency             |
 | **Dynamic environments**  | Resource-Based        | Adapts to real-time conditions    |
 
-## Further References
+## Reference Materials
 
 - [Horizontal vs Vertical Scaling](https://www.digitalocean.com/resources/article/horizontal-scaling-vs-vertical-scaling)
 - [What Is Load Balancing?](https://www.nginx.com/resources/glossary/load-balancing/)

@@ -15,22 +15,22 @@ In distributed systems, hashing is crucial for data distribution, load balancing
 
 **Purpose**: Security, integrity verification, digital signatures
 
-| Algorithm | Output Size | Security | Use Cases |
-|-----------|-------------|----------|-----------|
-| **MD5** | 128-bit | ❌ Broken | Legacy systems only |
-| **SHA-1** | 160-bit | ❌ Deprecated | Avoid for new systems |
-| **SHA-256** | 256-bit | ✅ Secure | Digital signatures, blockchain |
-| **SHA-3** | Variable | ✅ Latest standard | Modern cryptographic applications |
+| Algorithm   | Output Size | Security          | Use Cases                         |
+|-------------|-------------|-------------------|-----------------------------------|
+| **MD5**     | 128-bit     | ❌ Broken          | Legacy systems only               |
+| **SHA-1**   | 160-bit     | ❌ Deprecated      | Avoid for new systems             |
+| **SHA-256** | 256-bit     | ✅ Secure          | Digital signatures, blockchain    |
+| **SHA-3**   | Variable    | ✅ Latest standard | Modern cryptographic applications |
 
 ## Non-Cryptographic Hash Functions
 
 **Purpose**: Fast hashing for data structures, load balancing
 
-| Algorithm | Speed | Quality | Use Cases |
-|-----------|-------|---------|-----------|
-| **MurmurHash** | Very Fast | Good | Hash tables, caches |
-| **CityHash** | Fast | Good | Google's general-purpose hashing |
-| **xxHash** | Extremely Fast | Excellent | High-performance applications |
+| Algorithm      | Speed          | Quality   | Use Cases                        |
+|----------------|----------------|-----------|----------------------------------|
+| **MurmurHash** | Very Fast      | Good      | Hash tables, caches              |
+| **CityHash**   | Fast           | Good      | Google's general-purpose hashing |
+| **xxHash**     | Extremely Fast | Excellent | High-performance applications    |
 
 **Trade-offs:**
 
@@ -219,7 +219,7 @@ graph LR
 - Implement health checks and failover mechanisms
 - Use multiple hash rings for redundancy
 
-## Further References
+## Reference Materials
 
 - [Hashing Algorithms Overview](https://jscrambler.com/blog/hashing-algorithms)
 - [Consistent Hashing Deep Dive](https://www.toptal.com/big-data/consistent-hashing)  

@@ -116,7 +116,7 @@ While often confused, proxies and load balancers serve different primary purpose
 
 **Note**: Many modern solutions (like Nginx, HAProxy) can function as both reverse proxies and load balancers.
 
-## Further References
+## Reference Materials
 
 - [Proxy Server Overview](https://en.wikipedia.org/wiki/Proxy_server)
 - [Understanding Reverse Proxies](https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/)

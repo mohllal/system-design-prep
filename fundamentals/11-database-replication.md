@@ -275,7 +275,7 @@ graph TD
 - **R=N, W=1**: Fast writes, slow reads, high consistency  
 - **R=W=(N+1)/2**: Balanced performance and consistency
 
-## Further References
+## Reference Materials
 
 - [What is Database Replication?](https://www.ibm.com/topics/data-replication)
 - [Database Replication Explained](https://www.youtube.com/watch?v=bI8Ry6GhMSE&ab_channel=Exponent)

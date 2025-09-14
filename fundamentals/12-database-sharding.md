@@ -242,7 +242,7 @@ graph LR
 | **Directory-Based** | Flexible      | High       | Good          | Easy           | Multi-tenant, custom needs |
 | **Geographic**      | Geographic    | Medium     | Regional only | Medium         | Global apps, compliance    |
 
-## Further References
+## Reference Materials
 
 - [What is Database Sharding?](https://aws.amazon.com/what-is/database-sharding/)
 - [Understanding Database Sharding](https://www.digitalocean.com/community/tutorials/understanding-database-sharding)

@@ -367,7 +367,7 @@ RatingLevels:
 - Data warehouse and analytical systems
 - Caching layers where consistency can be eventually consistent
 
-## Further References
+## Reference Materials
 
 - [ACID Properties Explained](https://www.youtube.com/watch?v=GAe5oB742dw&ab_channel=ByteByteGo)
 - [How Transaction Isolation Provides Data Integrity in Database](https://newsletter.scalablethread.com/p/how-transaction-isolation-provides)

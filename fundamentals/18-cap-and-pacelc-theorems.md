@@ -308,7 +308,7 @@ graph TD
 - ❌ "CA systems are impossible"
 - ✅ **Reality**: CA systems exist but aren't distributed (single-node)
 
-## Further References
+## Reference Materials
 
 - [CAP Theorem - Wikipedia](https://en.wikipedia.org/wiki/CAP_theorem)
 - [PACELC Theorem - Wikipedia](https://en.wikipedia.org/wiki/PACELC_theorem)

@@ -166,7 +166,7 @@ sequenceDiagram
 **Caching**: Browser cache, CDN, proxy servers
 **DNS**: Pre-resolution, DNS-over-HTTPS (DoH)
 
-## Further References
+## Reference Materials
 
 - [TCP/IP Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
 - [How the TCP/IP Protocols Handle Data Communications](https://docs.oracle.com/cd/E26505_01/html/E27061/ipov-29.html)

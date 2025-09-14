@@ -177,7 +177,7 @@ graph LR
 - Database connection pools
 - Disk I/O capacity
 
-## Further References
+## Reference Materials
 
 - [What's the Difference Between Throughput and Latency?](https://aws.amazon.com/compare/the-difference-between-throughput-and-latency/)
 - [CDN Performance Optimization](https://www.cloudflare.com/learning/cdn/performance/)

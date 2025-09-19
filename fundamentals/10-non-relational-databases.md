@@ -1,154 +1,271 @@
-# Non-Relational Databases
+# Non-Relational Databases (NoSQL)
 
-Non-relational databases, also known as NoSQL databases are a class of database management systems that use various data models, including document-oriented, key-value, wide-column, and graph formats.
+NoSQL databases provide flexible data models optimized for specific use cases, offering horizontal scalability and high performance for modern applications.
 
-## Types
+They sacrifice (not all of them though) some ACID guarantees for improved availability and partition tolerance.
 
-### Document-oriented databases
+**When to Choose NoSQL**:
 
-Document-oriented databases store data in a semi-structured format, typically using `JSON` or `BSON` documents. Each document can have its own unique structure, and fields within documents can vary. Data is often stored in collections (equivalent to tables in relational databases), and documents within these collections can be indexed for efficient querying.
+- Rapid development with evolving schemas
+- Horizontal scaling requirements
+- Massive data volumes and high throughput
+- Specific data patterns (graphs, time-series, etc.)
+- Geographic distribution needs
 
-### Key-Value databases
+## Database Types
 
-Key-value stores are the simplest form of NoSQL databases, storing data as a collection of key-value pairs. The key is used to uniquely identify the data, and the value can be any type of data, ranging from simple strings to complex objects. Data in key-value stores is often stored in memory for fast access, with the option to persist data to disk for durability.
+### Document Databases
 
-### Graph databases
+Store data as flexible, JSON-like documents that can contain nested structures and varying schemas.
 
-Graph databases are designed to represent and store data as graphs, consisting of nodes (entities) and edges (relationships). Nodes and edges can have properties, and queries in graph databases are typically expressed as graph traversals. This allows for efficient querying of complex relationships between entities.
-
-### Time-series databases
-
-Time-series databases specialize in storing and querying time-series data, which is data that is indexed by time. They are optimized for handling data points that are generated sequentially over time, such as sensor data, financial data, and application metrics. Time-series databases often use compression and aggregation techniques to efficiently store and query large volumes of time-series data.
-
-### Column-oriented databases
-
-Column-oriented databases store data in columns rather than rows, which can be more efficient for analytical workloads that involve querying large datasets for specific columns. Data in column-oriented databases is typically stored in columnar storage formats, such as [Apache Parquet](https://parquet.apache.org/) or [Apache ORC](https://orc.apache.org/), which allow for efficient compression and encoding of column data.
-
-## BASE properties
-
-BASE is an acronym that stands for Basically available, soft state, and eventually consistent. It is a set of properties that emphasize the trade-offs made by non-relational databases for achieving high availability and scalability.
-
-- Basically available: the system guarantees availability, even in the face of network partitions and node failures by using a highly distributed approach to database management.
-- Soft state: the state of the system may change over time, even without input. This implies that the data stored in the system may be temporary or transient.
-- Eventually consistent: the system will eventually become consistent, given that the system is given enough time to converge. In other words, updates to the system will propagate and be reflected in all replicas, achieving eventual consistency.
-
-## Querying
-
-Querying in non-relational databases varies depending on the data model used by the database. Some common methods include:
-
-- Document-oriented databases: querying is typically done using document-oriented query languages like MongoDB's query language or Couchbase's N1QL. These languages allow for querying based on the structure and content of documents.
-- Key-value stores: querying is usually limited to simple operations like GET and PUT based on the keys of the stored data.
-- Wide-column stores: querying is performed using column-based query languages like [Cassandra Query Language (CQL)](https://cassandra.apache.org/doc/stable/cassandra/cql/) or HBase's query interface. These languages allow for querying based on column families and columns within those families.
-- Graph databases: querying is done using graph traversal languages like [Gremlin](https://en.wikipedia.org/wiki/Gremlin_(query_language)) or [Cypher](https://en.wikipedia.org/wiki/Cypher_(query_language)), which allow for complex graph-based queries to be executed.
-
-## Denormalization
-
-Data denormalization is used to improve read performance by reducing the need for complex joins and queries. Denormalization intentionally introduces redundancy to optimize for specific read-heavy use cases.
-
-### Examples of Data Denormalization in Different NoSQL Databases
-
-#### Denormalization in document-oriented databases
-
-In document-oriented databases, denormalization often involves embedding related data within a single document. For example, instead of storing users and their posts in separate collections and performing joins at query time, user documents can embed an array of post documents.
-
-```json
-{
-  "_id": "user123",
-  "name": "John Doe",
-  "email": "john.doe@example.com",
-  "posts": [
-    {
-      "postId": "post1",
-      "content": "This is the first post",
-      "timestamp": "2024-06-11T12:00:00Z"
-    },
-    {
-      "postId": "post2",
-      "content": "This is the second post",
-      "timestamp": "2024-06-12T12:00:00Z"
-    }
-  ]
-}
+```mermaid
+graph LR
+    A[Collection: Users] --> B["Document 1<br/>user_id: 123<br/>name: John<br/>emails: [...]"]
+    A --> C["Document 2<br/>user_id: 456<br/>name: Jane<br/>address: {...}"]
+    A --> D["Document 3<br/>user_id: 789<br/>name: Bob<br/>preferences: {...}"]
 ```
 
-### Denormalization in key-value databases
+**Characteristics**:
 
-In key-value stores, denormalization can involve storing composite values that combine related information. For example, storing user profile and session information together as a single value associated with a user key.
+- Schema flexibility within collections
+- Rich query capabilities with indexing
+- Horizontal scaling through sharding
+- ACID transactions (limited scope in distributed setups)
 
-```plaintext
-Key: user:123
-Value: {
-  "profile": {
-    "name": "John Doe",
-    "email": "john.doe@example.com"
-  },
-  "session": {
-    "lastLogin": "2024-06-11T12:00:00Z",
-    "sessionId": "abc123"
+**Use Cases**: Content management, user profiles, product catalogs, real-time analytics
+**Examples**: MongoDB, CouchDB, Amazon DocumentDB
+
+### Key-Value Stores
+
+Simplest NoSQL model storing data as key-value pairs with high performance and scalability.
+
+```mermaid
+graph LR
+    A[Key: user:123] --> B["Value: JSON/Binary/String"]
+```
+
+**Characteristics**:
+
+- Extremely fast read/write operations
+- Simple data model (no complex queries)
+- Horizontal scaling and partitioning
+- Often in-memory with optional persistence
+
+**Use Cases**: Caching, session storage, shopping carts, real-time recommendations
+**Examples**: Redis, Amazon DynamoDB, Riak, Memcached
+
+### Column-Family (Wide Column)
+
+Store data in column families, providing flexibility between relational and key-value models.
+
+```mermaid
+graph TD
+    A[Row Key: user123] --> B[Column Family: Profile]
+    A --> C[Column Family: Activity]
+    
+    B --> D["name: John<br/>email: john @ example.com<br/>age: 30"]
+    C --> E["last_login: 2024-01-15<br/>login_count: 45<br/>status: active"]
+```
+
+**Characteristics**:
+
+- Sparse columns (rows can have different columns)
+- Efficient for time-series and analytical data
+- High write throughput and compression
+- CQL (Cassandra Query Language) for familiar SQL-like interface
+
+**Use Cases**: Time-series data, IoT sensors, logging, real-time analytics
+**Examples**: Apache Cassandra, HBase, Amazon SimpleDB
+
+### Graph Databases
+
+Optimize for storing and querying relationships between entities using nodes and edges.
+
+```mermaid
+graph LR
+    A[User: Alice] -->|FOLLOWS| B[User: Bob]
+    B -->|LIKES| C[Post: GraphDB Tutorial]
+    A -->|AUTHORED| D[Post: NoSQL Guide]
+    B -->|COMMENTED_ON| D
+```
+
+**Characteristics**:
+
+- Native graph storage and processing
+- Efficient traversal of complex relationships
+- ACID transactions for data consistency
+- Graph query languages (Cypher, Gremlin)
+
+**Use Cases**: Social networks, recommendation engines, fraud detection, network analysis
+**Examples**: Neo4j, Amazon Neptune, ArangoDB
+
+### Time-Series Databases
+
+Specialized for time-stamped data with optimizations for temporal queries and analytics.
+
+```mermaid
+graph LR
+    A[Metric: cpu_usage] --> B[Time: 2024-01-15T10:00:00Z<br/>Value: 45.2<br/>Tags: server=web1, region=us-east]
+    A --> C[Time: 2024-01-15T10:01:00Z<br/>Value: 47.8<br/>Tags: server=web1, region=us-east]
+    A --> D[Time: 2024-01-15T10:02:00Z<br/>Value: 44.1<br/>Tags: server=web1, region=us-east]
+```
+
+**Characteristics**:
+
+- Optimized for time-based queries and aggregations
+- Built-in compression for temporal data
+- Retention policies and downsampling
+- Real-time ingestion and querying
+
+**Use Cases**: IoT monitoring, application metrics, financial data, log analysis
+**Examples**: InfluxDB, TimescaleDB, Prometheus
+
+## BASE Properties
+
+BASE represents the consistency model used by many NoSQL databases, contrasting with ACID properties of relational databases.
+
+### Basically Available
+
+**Principle**: System remains functional even during partial failures
+
+- Graceful degradation rather than complete failure
+- Some operations may be slower or limited
+- Read/write operations continue during network partitions
+
+### Soft State
+
+**Principle**: System state may change over time without external input
+
+- Data consistency isn't maintained at all times
+- Background processes synchronize data
+- Temporary inconsistencies are acceptable
+
+### Eventually Consistent
+
+**Principle**: System will become consistent given enough time
+
+- All replicas will converge to the same state
+- No guarantees on when consistency is achieved
+- Conflicts are resolved through various strategies
+
+## ACID vs BASE Comparison
+
+| Aspect                  | ACID (Relational)                      | BASE (NoSQL)                            |
+|-------------------------|----------------------------------------|-----------------------------------------|
+| **Consistency**         | Immediate, strong                      | Eventual, weak                          |
+| **Availability**        | May sacrifice for consistency          | Prioritized over consistency            |
+| **Partition Tolerance** | Limited                                | High                                    |
+| **Scalability**         | Vertical (limited)                     | Horizontal (unlimited)                  |
+| **Use Cases**           | Financial, transactional               | Social media, analytics, IoT            |
+| **CAP Theorem**         | CP (Consistency + Partition tolerance) | AP (Availability + Partition tolerance) |
+
+## Denormalization Strategies
+
+NoSQL databases embrace denormalization to optimize for read performance and reduce multi-collection operations.
+
+### Denormalization Patterns
+
+**Common Denormalization Patterns**:
+
+- **Embedding**: Nest related data within documents
+- **Duplication**: Copy data across entities for faster access
+- **Aggregation**: Pre-compute summaries and calculated values
+- **Materialized Views**: Create query-optimized data structures
+
+### Document Database Example
+
+**Normalized Approach** (Multiple collections):
+
+```javascript
+// Users collection
+{_id: "user123", name: "John", email: "john@example.com"}
+
+// Posts collection  
+{_id: "post1", userId: "user123", title: "Hello", content: "..."}
+{_id: "post2", userId: "user123", title: "World", content: "..."}
+```
+
+**Denormalized Approach** (Embedded documents):
+
+```javascript
+{
+  _id: "user123",
+  name: "John Doe",
+  email: "john@example.com",
+  posts: [
+    {
+      postId: "post1",
+      title: "Hello World",
+      content: "This is my first post",
+      timestamp: "2024-01-15T10:00:00Z",
+      tags: ["introduction", "hello"]
+    }
+  ],
+  profile: {
+    bio: "Software developer",
+    location: "San Francisco",
+    joinDate: "2023-01-01"
   }
 }
 ```
 
-### Denormalization in graph databases
+### Key-Value Store Example
 
-In graph databases, denormalization can involve duplicating nodes and relationships to speed up traversal queries. For example, creating direct relationships between frequently queried nodes even if those relationships can be derived from existing ones.
+**Composite Value Strategy**:
 
-Here the `VIEWED` is created as a separate relationship although it can be derived directly from the `PURCHASED` relationship.
-
-```plaintext
-Nodes:
-  (User: {id: "user123", name: "John Doe"})
-  (Product: {id: "product1", name: "Product 1"})
-  (Product: {id: "product2", name: "Product 2"})
-
-Relationships:
-  (User)-[:VIEWED]->(Product)
-  (User)-[:PURCHASED]->(Product)
+```json
+// Key: user_session:123
+{
+  "user": {
+    "id": "123",
+    "name": "John Doe",
+    "preferences": {"theme": "dark"}
+  },
+  "session": {
+    "loginTime": "2024-01-15T10:00:00Z",
+    "lastActivity": "2024-01-15T12:30:00Z",
+    "permissions": ["read", "write"]
+  },
+  "cache": {
+    "recentSearches": ["NoSQL", "databases"],
+    "favoriteItems": [{"id": "item1", "name": "Product A"}]
+  }
+}
 ```
 
-### Denormalization trade-offs
+### Denormalization Trade-offs
 
-While denormalization can significantly enhance read performance, it comes with trade-offs:
+| Aspect               | Benefits                             | Drawbacks                      |
+|----------------------|--------------------------------------|--------------------------------|
+| **Read Performance** | ✅ Faster queries, fewer operations   | ❌ Larger documents to transfer |
+| **Write Complexity** | ❌ Multiple updates needed            | ❌ Consistency challenges       |
+| **Storage**          | ❌ Data duplication increases storage | ❌ Higher storage costs         |
+| **Consistency**      | ❌ Eventual consistency required      | ❌ Potential data staleness     |
+| **Scalability**      | ✅ Better read scaling                | ❌ Write amplification          |
 
-- Increased storage requirements: redundant data can lead to increased storage usage.
-- Data consistency challenges: maintaining consistency across duplicate data can be complex, especially in distributed systems.
-- Complexity in write operations: write operations can become more complex and costly, as updates may need to be propagated to multiple logical (e.g. collections, items, etc...) and physical (partition, shard, etc...) locations.
+### When to Denormalize
 
-## Technologies
+**Good Candidates**:
 
-- Document-based databases
-  - [MongoDB](https://www.mongodb.com/)
-  - [Couchbase](https://www.couchbase.com/products/server/)
-  - [CouchDB](https://couchdb.apache.org/)
-- Key-value databases
-  - [Redis](https://redis.io/)
-  - [Memcached](https://memcached.org/)
-  - [etcd](https://etcd.io/)
-- Wide-column databases
-  - [Cassandra](https://cassandra.apache.org/)
-  - [HBase](https://hbase.apache.org/)
-  - [ScyllaDB](https://www.scylladb.com/)
-- Graph databases
-  - [Neo4j](https://neo4j.com/product/neo4j-graph-database/)
-  - [Amazon Neptune](https://aws.amazon.com/neptune/)
-  - [JanusGraph](https://janusgraph.org/)
-- Time-series databases
-  - [InfluxDB](https://www.influxdata.com/)
-  - [Prometheus](https://prometheus.io/)
-  - [TimescaleDB](https://www.timescale.com/)
-- Column-oriented databases
-  - [Cassandra](https://cassandra.apache.org/)
-  - [HBase](https://hbase.apache.org/)
-  - [GCP BigTable](https://cloud.google.com/bigtable)
+- Read-heavy workloads
+- Frequently accessed related data
+- Data that changes infrequently
+- Performance-critical user-facing queries
 
-## External references
+**Avoid When**:
 
-- [What is a NoSQL database?](https://cloud.google.com/discover/what-is-nosql)
-- [What Is BASE in database engineering?](https://www.lifewire.com/abandoning-acid-in-favor-of-base-1019674)
-- [What’s the difference between an ACID and a BASE database?](https://aws.amazon.com/compare/the-difference-between-acid-and-base-database/)
-- [SQL vs. NoSQL Explained](https://www.youtube.com/watch?v=_Ss42Vb1SU4&ab_channel=Exponent)
+- High write frequency with updates
+- Strong consistency requirements
+- Highly normalized data with complex relationships
+- Storage costs are primary concern
+
+## Reference Materials
+
+- [What is a NoSQL Database?](https://cloud.google.com/discover/what-is-nosql)
+- [NoSQL vs SQL Databases](https://www.youtube.com/watch?v=_Ss42Vb1SU4&ab_channel=Exponent)
 - [7 Database Paradigms](https://www.youtube.com/watch?v=W2Z7fbCLSTw&ab_channel=Fireship)
-- [What are time Series databases?](https://www.youtube.com/watch?v=vuNEWixlsWY&ab_channel=CodewithIrtiza)
-- [Graph Databases Will Change Your Freakin' Life (Best Intro Into Graph Databases)](https://www.youtube.com/watch?v=GekQqFZm7mA&ab_channel=CodingTech)
-- [Column vs Row Oriented Databases Explained](https://www.youtube.com/watch?v=Vw1fCeD06YI&ab_channel=HusseinNasser)
-- [Database denormalization](https://www.youtube.com/watch?v=4bTq0GdSeQs&t=8s&ab_channel=Decomplexify)
+- [ACID vs BASE Properties](https://aws.amazon.com/compare/the-difference-between-acid-and-base-database/)
+- [Graph Databases Introduction](https://www.youtube.com/watch?v=GekQqFZm7mA&ab_channel=CodingTech)
+- [Time-Series Databases Explained](https://www.youtube.com/watch?v=vuNEWixlsWY&ab_channel=CodewithIrtiza)
+- [Column vs Row Oriented Storage](https://www.youtube.com/watch?v=Vw1fCeD06YI&ab_channel=HusseinNasser)
+- [Database Denormalization Strategies](https://www.youtube.com/watch?v=4bTq0GdSeQs&ab_channel=Decomplexify)

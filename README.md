@@ -1,98 +1,144 @@
-# System Design Preparation
+# System Design Interview Preparation
 
-This repository contains my personal collection of notes and resources I consider important for preparing for system design interviews.
+A curated collection of system design concepts, patterns, and architectures designed as a comprehensive refresher for technical interviews.
 
-It is not intended to mimic other comprehensive repositories available elsewhere.
+It contains my personal collection of notes and resources I consider important for preparing for system design interviews.
 
-## Fundamentals
+## 🎯 Purpose
 
-1. [Client Server Model](./fundamentals/01-client-server.md)
-2. [Network Protocols](./fundamentals/02-network-protocols.md)
-3. [Latency and Throughput](./fundamentals/03-latency-and-throughput.md)
-4. [Availability](./fundamentals/04-availability.md)
-5. [Caching](./fundamentals/05-caching.md)
-6. [Proxies](./fundamentals/06-proxies.md)
-7. [Load Balancing](./fundamentals/07-load-balancing.md)
-8. [Hashing](./fundamentals/08-hashing.md)
-9. [Relational Databases](./fundamentals/09-relational-databases.md)
-10. [Non-Relational Databases](./fundamentals/10-non-relational-databases.md)
-11. [Database Replication](./fundamentals/11-database-replication.md)
-12. [Database Sharding](./fundamentals/12-database-sharding.md)
-13. [Leader Election](./fundamentals/13-leader-election.md)
-14. [Peer-to-Peer Networks](./fundamentals/14-peer-to-peer-networks.md)
-15. [Rate Limiting](./fundamentals/15-rate-limiting.md)
-16. [Pub/Sub](./fundamentals/16-pub-sub.md)
-17. [MapReduce](./fundamentals/17-mapreduce.md)
-18. [CAP and PACELC Theorems](./fundamentals/18-cap-and-pacelc-theorems.md)
-19. [Back of the Envelope Calculations](./fundamentals/19-back-of-the-envelope-calculations.md)
+This repository serves as:
 
-## Architecture
+- **Interview Refresher**: Quick review of essential system design concepts
+- **Visual Learning Guide**: Mermaid diagrams and clear explanations for better retention
 
-1. [Layered Architecture](./architecture/01-layered-architecture.md)
-2. [Hexagonal Architecture (Ports and Adapters)](./architecture/02-hexagonal-architecture.md)
-3. [Microservices Architecture](./architecture/03-microservices-architecture.md)
-4. [Event Driven Architecture (EDA)](./architecture/04-event-driven-architecture.md)
-5. [Two Phase Commit (2PC)](./architecture/05-two-phase-commit.md)
-6. [Saga](./architecture/06-saga.md)
-7. [Transactional Outbox](./architecture/07-transactional-outbox.md)
-8. [Circuit Breaker](./architecture/08-circuit-breaker.md)
-9. [Event Sourcing](./architecture/09-event-sourcing.md)
-10. [Command Query Responsibility Segregation (CQRS)](./architecture/10-cqrs.md)
+## 🚀 How to Use This Repository
 
-## System Designs
+1. **Start with Fundamentals**: Build strong foundational knowledge
+2. **Explore Architectures**: Understand patterns and their applications  
+3. **Practice with Systems**: Apply concepts to real-world design problems
+4. **Challenge Ideas**: Question assumptions and understand trade-offs
 
-1. [Design a URL Shortening System](./systems/01-design-a-url-shortening-system.md)
+## 🔧 Fundamentals
 
-## Additional Resources
+Essential building blocks for understanding distributed systems and scalable architectures.
 
-Here are additional resources for exploring system design and building scalable systems, including repositories, blogs, courses, and white papers, etc...
+### Communication & Networking
 
-### Repositories
+- [Client-Server Model](./fundamentals/01-client-server.md) - Request-response patterns, DNS, REST vs RPC vs GraphQL
+- [Network Protocols](./fundamentals/02-network-protocols.md) - TCP/IP stack, browser request flow, protocol trade-offs  
+- [Latency and Throughput](./fundamentals/03-latency-and-throughput.md) - Performance metrics, optimization strategies
 
-- [System Design Primer](https://github.com/donnemartin/system-design-primer)
-- [System Design 101 by ByteByteGo](https://github.com/ByteByteGoHq/system-design-101)
-- [System Design by Karan Pratap](https://github.com/karanpratapsingh/system-design)
-- [System Design by Neo Kim](https://github.com/systemdesign42/system-design)
-- [Awesome System Design Resources by Ashish Pratap](https://github.com/ashishps1/awesome-system-design-resources)
+### Reliability & Performance  
 
-### YouTube Playlists
+- [Availability and Reliability](./fundamentals/04-availability-and-reliability.md) - Uptime targets, redundancy patterns
+- [Caching](./fundamentals/05-caching.md) - Cache strategies, levels, invalidation patterns
+- [Proxies](./fundamentals/06-proxies.md) - Forward/reverse proxies, load balancers, CDNs
+- [Load Balancing](./fundamentals/07-load-balancing.md) - Distribution algorithms, health checks
 
-- [codeKarle - System Design Interview Question](https://www.youtube.com/watch?v=3loACSxowRU&list=PLhgw50vUymycJPN6ZbGTpVKAJ0cL4OEH3&ab_channel=codeKarle)
-- [Hello Interview - System Design Walkthroughs](https://www.youtube.com/watch?v=fhdPyoO6aXI&list=PL5q3E8eRUieWtYLmRU3z94-vGRcwKr9tM&ab_channel=HelloInterview-SWEInterviewPreparation)
+### Data & Storage
 
-### Engineering Blogs
+- [Hashing](./fundamentals/08-hashing.md) - Consistent hashing, partitioning strategies
+- [Relational Databases](./fundamentals/09-relational-databases.md) - ACID properties, SQL optimization, indexing
+- [Non-Relational Databases](./fundamentals/10-non-relational-databases.md) - NoSQL types, CAP theorem trade-offs
+- [Database Replication](./fundamentals/11-database-replication.md) - Master-slave, master-master patterns
+- [Database Sharding](./fundamentals/12-database-sharding.md) - Horizontal partitioning strategies
 
-- [Netflix Tech Blog](http://techblog.netflix.com/)
-- [Uber Engineering Blog](http://eng.uber.com/)
-- [Facebook Engineering Blog](https://engineering.fb.com/)
-- [AWS Blog](https://aws.amazon.com/blogs/aws)
-- [Google Research Blog](http://googleresearch.blogspot.com/)
-- [Twitter Engineering Blog](https://blog.x.com/engineering/en_us)
+### Distributed Systems Concepts
 
-### System Design Blogs
+- [Leader Election](./fundamentals/13-leader-election.md) - Consensus algorithms, coordination patterns
+- [Peer-to-Peer Networks](./fundamentals/14-peer-to-peer-networks.md) - Decentralized architectures
+- [Rate Limiting](./fundamentals/15-rate-limiting.md) - Traffic control, algorithms, implementation
+- [Pub/Sub](./fundamentals/16-pub-sub.md) - Messaging patterns, event-driven architectures
+- [MapReduce](./fundamentals/17-mapreduce.md) - Distributed computing paradigm
+- [CAP and PACELC Theorems](./fundamentals/18-cap-and-pacelc-theorems.md) - Distributed systems constraints
 
-- [System Design One](https://newsletter.systemdesign.one/)
-- [ByteByteGo](https://blog.bytebytego.com/)
-- [AlgoMaster](https://blog.algomaster.io/)
-- [System Design Codex](https://newsletter.systemdesigncodex.com/)
-- [Byte-sized Design](https://bytesizeddesign.substack.com/)
-- [Software Architecture Monday](https://www.developertoarchitect.com/lessons/)
+### Capacity Planning
 
-### White Papers
+- [Back-of-the-Envelope Calculations](./fundamentals/19-back-of-the-envelope-calculations.md) - Estimation techniques, performance numbers
 
-- [MapReduce: Simplified Data Processing on Large Clusters](https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf)
-- [Bigtable: A Distributed Storage System for Structured Data](https://static.googleusercontent.com/media/research.google.com/en//archive/bigtable-osdi06.pdf)
-- [Gorilla: A Fast, Scalable, In-Memory Time Series Database](https://www.vldb.org/pvldb/vol8/p1816-teller.pdf)
-- [Unicorn: A System for Searching the Social Graph](https://scontent-hbe1-1.xx.fbcdn.net/v/t39.8562-6/240856482_241210887912601_5976658157809742838_n.pdf)
-- [Life beyond Distributed Transactions: an Apostate’s Opinion](https://ics.uci.edu/~cs223/papers/cidr07p15)
-- [Sagas](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf)
+## 🏗️ Architecture Patterns
 
-### Courses
+Proven architectural approaches for building scalable and maintainable systems.
 
-- [Design Gurus - Grokking the System Design Interview](https://www.designgurus.io/course/grokking-the-system-design-interview)
-- [Design Gurus - Grokking System Design Fundamentals](https://www.designgurus.io/course/grokking-system-design-fundamentals)
-- [Design Gurus - Grokking the Advanced System Design Interview](https://www.designgurus.io/course/grokking-the-advanced-system-design-interview)
-- [Design Gurus - Grokking Microservices Design Patterns](https://www.designgurus.io/course/grokking-microservices-design-patterns)
-- [Educative - Grokking Modern System Design Interview for Engineers & Managers](https://www.educative.io/courses/grokking-modern-system-design-interview-for-engineers-managers)
-- [Educative - Grokking the Principles and Practices of Advanced System Design](https://www.educative.io/courses/grokking-the-principles-and-practices-of-advanced-system-design)
-- [Educative - Distributed Systems for Practitioners](https://www.educative.io/courses/distributed-systems-practitioners)
+### Structural Patterns
+
+- [Layered Architecture](./architecture/01-layered-architecture.md) - Traditional n-tier separation of concerns
+- [Hexagonal Architecture](./architecture/02-hexagonal-architecture.md) - Ports and adapters pattern
+- [Microservices Architecture](./architecture/03-microservices-architecture.md) - Distributed service-oriented design
+
+### Event-Driven Patterns  
+
+- [Event-Driven Architecture](./architecture/04-event-driven-architecture.md) - Asynchronous communication patterns
+- [Event Sourcing](./architecture/09-event-sourcing.md) - State as sequence of events
+- [CQRS](./architecture/10-cqrs.md) - Command Query Responsibility Segregation
+
+### Resilience Patterns
+
+- [Circuit Breaker](./architecture/08-circuit-breaker.md) - Fault tolerance and graceful degradation
+- [Two-Phase Commit](./architecture/05-two-phase-commit.md) - Distributed transaction coordination
+- [Saga Pattern](./architecture/06-saga.md) - Managing distributed transactions
+- [Transactional Outbox](./architecture/07-transactional-outbox.md) - Reliable event publishing
+
+## 🏢 System Design Examples
+
+Real-world system design problems with comprehensive solutions.
+
+- [URL Shortening System](./examples/01-design-a-url-shortening-system.md) - Design bit.ly or tinyurl.com
+
+*More system designs coming soon...*
+
+## 📚 Additional Learning Resources
+
+Curated external resources for deepening system design knowledge.
+
+### 🎓 Educational Content
+
+**Repositories**
+
+- [System Design Primer](https://github.com/donnemartin/system-design-primer) - Comprehensive collection of system design concepts
+- [System Design 101](https://github.com/ByteByteGoHq/system-design-101) - Visual explanations by ByteByteGo
+- [Awesome System Design Resources](https://github.com/ashishps1/awesome-system-design-resources) - Curated list of resources
+
+**Video Learning**
+
+- [Hello Interview - System Design Walkthroughs](https://www.youtube.com/playlist?list=PL5q3E8eRUieWtYLmRU3z94-vGRcwKr9tM) - Detailed interview walkthroughs
+- [codeKarle - System Design Questions](https://www.youtube.com/playlist?list=PLhgw50vUymycJPN6ZbGTpVKAJ0cL4OEH3) - Interview-focused content
+
+**Online Courses**
+
+- [Grokking the System Design Interview](https://www.designgurus.io/course/grokking-the-system-design-interview) - Interview preparation
+- [Educative - Modern System Design](https://www.educative.io/courses/grokking-modern-system-design-interview-for-engineers-managers) - Comprehensive course
+
+### 🏢 Industry Insights
+
+**Engineering Blogs**
+
+- [Netflix Tech Blog](http://techblog.netflix.com/) - Streaming and microservices insights
+- [Uber Engineering](http://eng.uber.com/) - Real-time systems and data processing
+- [Meta Engineering](https://engineering.fb.com/) - Large-scale social systems
+- [AWS Architecture Blog](https://aws.amazon.com/blogs/architecture/) - Cloud-native patterns
+
+**System Design Newsletters**
+
+- [ByteByteGo](https://blog.bytebytego.com/) - Weekly system design insights
+- [System Design Newsletter](https://newsletter.systemdesign.one/) - Deep dives into architecture
+- [Software Architecture Monday](https://www.developertoarchitect.com/lessons/) - Architecture patterns
+
+### 📄 Foundational Papers
+
+**Distributed Systems**
+
+- [MapReduce](https://static.googleusercontent.com/media/research.google.com/en//archive/mapreduce-osdi04.pdf) - Simplified data processing on large clusters
+- [Bigtable](https://static.googleusercontent.com/media/research.google.com/en//archive/bigtable-osdi06.pdf) - Distributed storage system for structured data
+- [Dynamo](https://www.allthingsdistributed.com/files/amazon-dynamo-sosp2007.pdf) - Amazon's highly available key-value store
+
+**Transaction Management**
+
+- [Sagas](https://www.cs.cornell.edu/andru/cs711/2002fa/reading/sagas.pdf) - Managing long-lived transactions
+- [Life beyond Distributed Transactions](https://ics.uci.edu/~cs223/papers/cidr07p15) - Alternative approaches to ACID
+
+---
+
+## 🤝 Contributing
+
+This repository reflects personal learning and interview preparation. While primarily for personal use, suggestions and improvements are welcome through issues and pull requests.
